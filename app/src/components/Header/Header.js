@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import {CenterFocusWeakRounded} from "@material-ui/icons";
 import {Link} from "react-router-dom";
-import {MenuItem} from "@material-ui/core"
+import {MenuItem} from "@material-ui/core";
 import { useAuth0 } from "@auth0/auth0-react";
 import Avatar from '@material-ui/core/Avatar';
 

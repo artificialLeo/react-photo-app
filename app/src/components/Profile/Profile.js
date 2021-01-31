@@ -1,20 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
-import {makeStyles} from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
+import { Grid } from "@material-ui/core";
+import { Paper } from "@material-ui/core";
+import PostCard from "../PostCard/PostCard";
 
 const useStyles = makeStyles((theme) => ({
-    profile: {
-        overflow: 'hidden'
-    }
+    root: {
+        marginTop: '20px'
+    },
+
 }));
-const Profile = () => {
+
+const Profile = ({data}) => {
     const classes = useStyles();
-    const { user } = useAuth0();
+    const {user} = useAuth0();
+
+    useEffect(() => {
+        console.log(data)
+    }, []);
+
 
     return (
-        <div className={classes.profile}>
-            {JSON.stringify(user, null, 2)}
-        </div>
+        <Grid container
+              direction="row"
+              justify="space-evenly"
+              alignItems="flex-start"
+              className={classes.root}
+        >
+                <PostCard/>
+                <PostCard/>
+                <PostCard/>
+                <PostCard/>
+        </Grid>
     );
 };
 
