@@ -15,6 +15,8 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import ShareIcon from '@material-ui/icons/Share';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
+import AddCommentRoundedIcon from '@material-ui/icons/AddCommentRounded';
 
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -63,11 +65,10 @@ export default function PostCard() {
                 }
                 action={
                     <IconButton aria-label="settings">
-                        <MoreVertIcon />
+                        <CancelRoundedIcon />
                     </IconButton>
                 }
-                // title="Shrimp and Chorizo Paella"
-                // subheader="September 14, 2016"
+
             />
             <CardMedia
                 className={classes.media}
@@ -82,10 +83,10 @@ export default function PostCard() {
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="add to favorites">
-                    <FavoriteIcon />
+                    <FavoriteIcon color="error" />
                 </IconButton>
                 <IconButton aria-label="share">
-                    <ShareIcon />
+                    <AddCommentRoundedIcon />
                 </IconButton>
                 <IconButton
                     className={clsx(classes.expand, {
