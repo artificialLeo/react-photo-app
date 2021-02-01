@@ -8,7 +8,7 @@ const jsonParser = express.json();
 const userScheme = new Schema(
     {
         mail: String,
-        posts: [ { img: String, description: String, liked: String, comments: [ { author: String, text: String } ] } ],
+        posts: [ { img: String, description: String, liked: String, postComId: String, comments: [ { author: String, text: String } ] } ],
         guests: [ { name: String, ava: String, follow: String, posts: [ { img: String, comments: [ { author: String, text: String } ] } ] } ]
     }, {collection: "usersData"});
 const User = mongoose.model("User", userScheme);
@@ -35,47 +35,33 @@ app.get("/api/users", function(req, res){
 
 app.get("/api/users/:id", function(req, res){
 
-    const id = req.params.id;
-    User.findOne({_id: id}, function(err, user){
+    const mail = req.params.id;
+
+    User.findOne({mail: mail}, function(err, user){
 
         if(err) return console.log(err);
         res.send(user);
     });
 });
 
-app.post("/api/users", jsonParser, function (req, res) {
+app.put("/api/users/", jsonParser, function(req, res){
 
     if(!req.body) return res.sendStatus(400);
 
-    const userName = req.body.name;
-    const userAge = req.body.age;
-    const user = new User({name: userName, age: userAge});
+    const mail = req.body.params.mail;
+    const id = req.body.params.id;
 
-    user.save(function(err){
-        if(err) return console.log(err);
-        res.send(user);
-    });
-});
+    console.log(mail)
+    console.log(id)
 
-app.delete("/api/users/:id", function(req, res){
+    User.updateOne({}, {
+        $pull: {
+            posts: {
+                postComId: id
+            }
+        }
+    },function(err, user){
 
-    const id = req.params.id;
-    User.findByIdAndDelete(id, function(err, user){
-
-        if(err) return console.log(err);
-        res.send(user);
-    });
-});
-
-app.put("/api/users", jsonParser, function(req, res){
-
-    if(!req.body) return res.sendStatus(400);
-    const id = req.body.id;
-    const userName = req.body.name;
-    const userAge = req.body.age;
-    const newUser = {age: userAge, name: userName};
-
-    User.findOneAndUpdate({_id: id}, newUser, {new: true}, function(err, user){
         if(err) return console.log(err);
         res.send(user);
     });

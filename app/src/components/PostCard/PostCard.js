@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
@@ -19,6 +19,9 @@ import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import AddCommentRoundedIcon from '@material-ui/icons/AddCommentRounded';
 
 import { useAuth0 } from "@auth0/auth0-react";
+import {selectPostData} from "../../store/actions";
+import {connect} from "react-redux";
+import {deletePost} from "../../store/reducers";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -45,15 +48,28 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function PostCard() {
+function PostCard({deletePost, postData, comments, photo, description, liked, postComId}) {
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
 
-    const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
-
+    const { user } = useAuth0();
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
+    };
+
+    const renderComment = (author, text, i) => {
+        return (
+            <div key={i}>
+                <Typography variant="h6">{author}</Typography>
+                <Typography paragraph>{text}</Typography>
+            </div>
+        );
+    };
+
+    const removeCard = (searchParamsForDatabase) => {
+        console.log(searchParamsForDatabase)
+        deletePost(searchParamsForDatabase, user.email);
     };
 
     return (
@@ -64,26 +80,26 @@ export default function PostCard() {
                     </Avatar>
                 }
                 action={
-                    <IconButton aria-label="settings">
-                        <CancelRoundedIcon />
+                    <IconButton aria-label="delete" onClick={removeCard.bind(this, postComId)} >
+                        <CancelRoundedIcon fontSize="large"   />
                     </IconButton>
                 }
 
             />
             <CardMedia
                 className={classes.media}
-                image="/static/images/cards/paella.jpg"
-                title="Paella dish"
+                image={photo || 'img'}
+                alt="Post Photo"
+                title="Post"
             />
             <CardContent>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    This impressive paella is a perfect party dish and a fun meal to cook together with your
-                    guests. Add 1 cup of frozen peas along with the mussels, if you like.
+                    {description}
                 </Typography>
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="add to favorites">
-                    <FavoriteIcon color="error" />
+                    <FavoriteIcon color={`${liked === 'true' ? "error" : "primary" }`} />
                 </IconButton>
                 <IconButton aria-label="share">
                     <AddCommentRoundedIcon />
@@ -101,24 +117,18 @@ export default function PostCard() {
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
                 <CardContent>
-                    <Typography paragraph>Method:</Typography>
-                    <Typography paragraph>
-                        Heat 1/2 cup of the broth in a pot until simmering, add saffron and set aside for 10
-                        minutes.
-                    </Typography>
-                    <Typography paragraph>Method:</Typography>
-                    <Typography paragraph>
-                        Heat 1/2 cup of the broth in a pot until simmering, add saffron and set aside for 10
-                        minutes.
-                    </Typography>
-                    <Typography paragraph>Method:</Typography>
-                    <Typography paragraph>
-                        Heat 1/2 cup of the broth in a pot until simmering, add saffron and set aside for 10
-                        minutes.
-                    </Typography>
+
+                    {comments && comments.map( ( item, i ) => renderComment(item.author, item.text, i) )}
 
                 </CardContent>
             </Collapse>
         </Card>
     );
 }
+
+const mapStateToProps = (state) => ({
+    postData: selectPostData(state)
+});
+
+
+export default connect(mapStateToProps, {deletePost})(PostCard);
