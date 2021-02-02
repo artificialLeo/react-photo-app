@@ -6,8 +6,10 @@ import { Paper } from "@material-ui/core";
 import PostCard from "../PostCard/PostCard";
 import { connect } from "react-redux";
 import { selectUserData } from "../../store/actions";
-import { getUser } from "../../store/reducers";
+import { getUser, deletePost } from "../../store/reducers";
 import axios from "axios";
+import { useSelector } from 'react-redux'
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -16,51 +18,48 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-const Profile = ({getUser, userData}) => {
+const Profile = ({getUser, userData, deletePost}) => {
     const classes = useStyles();
     const {user} = useAuth0();
 
+    let [renderedCards, setNumberOfRenderedCards] = useState([]);
+
     useEffect(() => {
-        getUser(user.email);
+        // getUser(user.email);
+        axios.get("http://localhost:4000/api/users/" + user.email, { params: { id: user.email }})
+             .then(response => setNumberOfRenderedCards(response.data.posts) );
 
-        // axios.delete("http://localhost:4000/api/users/0", {
-        //     params: {
-        //         id: 0
-        //     }
-        // }).then(response => console.log(response.data));
+        // setNumberOfRenderedCards(userData.posts);
+    }, [getUser, userData, user.email]);
 
-        async function DeleteUser(id) {
-            const response = await fetch("http://localhost:4000/api/users" + id, {
-                method: "DELETE",
-                headers: { "Accept": "application/json" }
-            });
-            if (response.ok === true) {
-                const user1 = await response.json();
-                console.log(user1)
-            }
-        }
 
-    }, [getUser, user.email]);
 
+
+
+    const removeCard = (searchParamsForDatabase) => {
+        deletePost(searchParamsForDatabase, user.email);
+        const newRenderList = renderedCards && renderedCards.filter((item) => item.postComId !== searchParamsForDatabase);
+        console.log(newRenderList)
+        setNumberOfRenderedCards(newRenderList);
+    };
 
     const renderCards = () => {
-        return userData.posts && userData.posts.map( ( item, i ) => <PostCard key={i}
+        return renderedCards && renderedCards.map( ( item, i ) => <PostCard key={i}
                                                                               comments={item.comments}
                                                                               photo={item.img}
                                                                               description={item.description}
                                                                               liked={item.liked}
-                                                                              postComId={item.postComId} />);
-    };
+                                                                              postComId={item.postComId}
+                                                                              allDataForRemoveHandling={userData.posts}
+                                                                              removeCard={removeCard}
+        />);};
 
     return (
         <Grid container
               direction="row"
               justify="space-evenly"
               alignItems="flex-start"
-              className={classes.root}
-        >
-
-
+              className={classes.root}>
             { renderCards() }
         </Grid>
     );
@@ -71,4 +70,4 @@ const mapStateToProps = (state) => ({
 });
 
 
-export default connect(mapStateToProps, {getUser})(Profile);
+export default connect(mapStateToProps, {getUser, deletePost})(Profile);

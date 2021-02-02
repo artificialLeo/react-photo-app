@@ -20,22 +20,13 @@ const setPost = (payload) => ({
 });
 
 export const getData = () => async dispatch => {
-    axios.get(url).then(response => dispatch(setData(response.data)));
+    axios.get("http://localhost:4000/api/users/").then(response => dispatch(setData(response.data)));
 };
 
 export const getUser = (email) => async dispatch => {
-    axios.get(url + email, {
-        params: {
-            id: email
-        }
-    }).then(response => dispatch(setUser(response.data)));
+    axios.get("http://localhost:4000/api/users/" + email, { params: { id: email }}).then(response => dispatch(setUser(response.data)));
 };
 
 export const deletePost = (postId, email) => async dispatch => {
-    axios.put(url, {
-        params: {
-            id: postId,
-            mail: email
-        }
-    }).then(response => dispatch(setPost(response.data)));
+    axios.put("http://localhost:4000/api/users/", { params: { id: postId, mail: email }}).then(response => dispatch(setPost(response.data)));
 };

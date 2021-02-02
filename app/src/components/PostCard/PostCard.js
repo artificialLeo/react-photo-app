@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import Card from '@material-ui/core/Card';
@@ -17,11 +17,13 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import AddCommentRoundedIcon from '@material-ui/icons/AddCommentRounded';
+import { Input } from '@material-ui/core';
 
 import { useAuth0 } from "@auth0/auth0-react";
 import {selectPostData} from "../../store/actions";
 import {connect} from "react-redux";
 import {deletePost} from "../../store/reducers";
+import axios from "axios";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -46,16 +48,39 @@ const useStyles = makeStyles((theme) => ({
     avatar: {
         backgroundColor: red[500],
     },
+    inputForComment: {
+        marginTop: '10px'
+    }
 }));
 
-function PostCard({deletePost, postData, comments, photo, description, liked, postComId}) {
+export default function PostCard({deletePost, postData, comments, photo, description, liked, postComId, removeCard}) {
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
+    const commentInput = useRef(null);
 
     const { user } = useAuth0();
 
+    const [like, setLike] = useState(liked);
+    const [commentToAdd, setCommentToAdd] = useState('');
+    const [commentsList, setCommentsList] = useState(comments);
+
+    // useEffect(() => {
+    //
+    // }, []);
+
     const handleExpandClick = () => {
         setExpanded(!expanded);
+    };
+
+    const handleInputChange = () => {
+        setCommentToAdd(commentInput.current.value)
+
+    };
+
+    const handleInputReset = () => {
+        // commentInput.current.value = '';
+        // setCommentToAdd('')
+
     };
 
     const renderComment = (author, text, i) => {
@@ -67,12 +92,33 @@ function PostCard({deletePost, postData, comments, photo, description, liked, po
         );
     };
 
-    const removeCard = (searchParamsForDatabase) => {
-        console.log(searchParamsForDatabase)
-        deletePost(searchParamsForDatabase, user.email);
+    const likePost = (likeValue, id) => {
+        if (like === 'true') {
+            setLike('false');
+            axios.put("http://localhost:4000/api/users/fav"+id, { params: { id: id, mail: user.email, liked: 'false' }});
+        } else {
+            setLike('true');
+            axios.put("http://localhost:4000/api/users/fav"+id, { params: { id: id, mail: user.email, liked: 'true' }});
+        }
+    };
+
+    const addComment = (id) => {
+        if (commentToAdd.length !== 0) {
+            axios.post("http://localhost:4000/api/comments", {
+                params: {id: id, mail: user.email, userName: user.nickname, userText: commentToAdd}
+            }).then(response => console.log(response));
+
+            commentInput.current.value = '';
+            setCommentToAdd('');
+
+            axios.get("http://localhost:4000/api/users/" + user.email, { params: { id: user.email }}).then(response => setCommentsList(response.data.comments));
+
+        }
+
     };
 
     return (
+        <div>
         <Card className={classes.root}>
             <CardHeader
                 avatar={
@@ -96,13 +142,14 @@ function PostCard({deletePost, postData, comments, photo, description, liked, po
                 <Typography variant="body2" color="textSecondary" component="p">
                     {description}
                 </Typography>
+                <Input inputRef={commentInput} placeholder="Your Impressions" className={classes.inputForComment} onChange={handleInputChange} />
             </CardContent>
             <CardActions disableSpacing>
-                <IconButton aria-label="add to favorites">
-                    <FavoriteIcon color={`${liked === 'true' ? "error" : "primary" }`} />
+                <IconButton aria-label="add to favorites" onClick={likePost.bind(this, liked, postComId)}>
+                    <FavoriteIcon color={`${like === 'true' ? "error" : "primary" }`} />
                 </IconButton>
-                <IconButton aria-label="share">
-                    <AddCommentRoundedIcon />
+                <IconButton aria-label="add-comment"  onClick={addComment.bind(this, postComId)} >
+                    <AddCommentRoundedIcon/>
                 </IconButton>
                 <IconButton
                     className={clsx(classes.expand, {
@@ -115,20 +162,14 @@ function PostCard({deletePost, postData, comments, photo, description, liked, po
                     <ExpandMoreIcon />
                 </IconButton>
             </CardActions>
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
+            <Collapse in={expanded} timeout="auto" unmountOnExit >
                 <CardContent>
 
-                    {comments && comments.map( ( item, i ) => renderComment(item.author, item.text, i) )}
+                    {commentsList && commentsList.map( ( item, i ) => renderComment(item.author, item.text, i) )}
 
                 </CardContent>
             </Collapse>
         </Card>
+        </div>
     );
 }
-
-const mapStateToProps = (state) => ({
-    postData: selectPostData(state)
-});
-
-
-export default connect(mapStateToProps, {deletePost})(PostCard);

@@ -51,15 +51,48 @@ app.put("/api/users/", jsonParser, function(req, res){
     const mail = req.body.params.mail;
     const id = req.body.params.id;
 
-    console.log(mail)
-    console.log(id)
-
-    User.updateOne({}, {
+    User.updateOne({mail: mail}, {
         $pull: {
             posts: {
                 postComId: id
             }
         }
+    },function(err, user){
+
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
+
+app.put("/api/users/:fav", jsonParser, function(req, res){
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const id = req.body.params.id;
+    const liked = req.body.params.liked;
+
+    User.updateOne({mail: mail, "posts.postComId": id}, {
+        $set: { "posts.$.liked" : liked }
+    },function(err, user){
+
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
+
+app.post("/api/comments", jsonParser, function (req, res) {
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const id = req.body.params.id;
+    const userName = req.body.params.userName;
+    const userText = req.body.params.userText;
+    const comment = new User({author: userName, text: userText});
+
+    User.updateOne({mail: mail, "posts.postComId": id}, {
+        $addToSet: { "posts.$.comments" :{author: userName, text: userText} }
     },function(err, user){
 
         if(err) return console.log(err);
