@@ -8,8 +8,10 @@ const jsonParser = express.json();
 const userScheme = new Schema(
     {
         mail: String,
+        ava: String,
         posts: [ { img: String, description: String, liked: String, postComId: String, comments: [ { author: String, text: String } ] } ],
-        guests: [ { name: String, ava: String, follow: String, posts: [ { img: String, comments: [ { author: String, text: String } ] } ] } ]
+        // guests: [ { name: String, ava: String, follow: String, posts: [ { img: String, comments: [ { author: String, text: String } ] } ] } ]
+        followers: [String]
     }, {collection: "usersData"});
 const User = mongoose.model("User", userScheme);
 
@@ -89,10 +91,41 @@ app.post("/api/comments", jsonParser, function (req, res) {
     const id = req.body.params.id;
     const userName = req.body.params.userName;
     const userText = req.body.params.userText;
-    const comment = new User({author: userName, text: userText});
 
     User.updateOne({mail: mail, "posts.postComId": id}, {
-        $addToSet: { "posts.$.comments" :{author: userName, text: userText} }
+        $addToSet: { "posts.$.comments" :{ author: userName, text: userText } }
+    },function(err, user){
+
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
+
+app.post("/api/followers", jsonParser, function (req, res) {
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const userName = req.body.params.userName;
+
+    User.updateOne({mail: mail}, {
+        $addToSet: { followers : userName }
+    },function(err, user){
+
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
+
+app.put("/api/followers", jsonParser, function(req, res){
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const userName = req.body.params.userName;
+
+    User.updateOne({mail: mail}, {
+        $pull: { followers : userName }
     },function(err, user){
 
         if(err) return console.log(err);

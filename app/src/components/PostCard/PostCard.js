@@ -50,6 +50,11 @@ const useStyles = makeStyles((theme) => ({
     },
     inputForComment: {
         marginTop: '10px'
+    },
+    commentsBlock: {
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        marginBottom: '50px'
     }
 }));
 
@@ -65,7 +70,7 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
     const [commentsList, setCommentsList] = useState(comments);
 
     // useEffect(() => {
-    //
+    //     console.log(commentsList)
     // }, []);
 
     const handleExpandClick = () => {
@@ -74,14 +79,8 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
 
     const handleInputChange = () => {
         setCommentToAdd(commentInput.current.value)
-
     };
 
-    const handleInputReset = () => {
-        // commentInput.current.value = '';
-        // setCommentToAdd('')
-
-    };
 
     const renderComment = (author, text, i) => {
         return (
@@ -106,12 +105,14 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
         if (commentToAdd.length !== 0) {
             axios.post("http://localhost:4000/api/comments", {
                 params: {id: id, mail: user.email, userName: user.nickname, userText: commentToAdd}
-            }).then(response => console.log(response));
+            });
 
             commentInput.current.value = '';
             setCommentToAdd('');
 
-            axios.get("http://localhost:4000/api/users/" + user.email, { params: { id: user.email }}).then(response => setCommentsList(response.data.comments));
+            // axios.get("http://localhost:4000/api/users/" + user.email, { params: { id: user.email }})
+            //     .then(response => console.log(response.data.posts.find(item => item.postComId)) );
+
 
         }
 
@@ -163,8 +164,8 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
                 </IconButton>
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit >
-                <CardContent>
-
+                <CardContent className={classes.commentsBlock} >
+                    {/*{console.log(commentsList)}*/}
                     {commentsList && commentsList.map( ( item, i ) => renderComment(item.author, item.text, i) )}
 
                 </CardContent>

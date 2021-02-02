@@ -9,6 +9,7 @@ import { selectUserData } from "../../store/actions";
 import { getUser, deletePost } from "../../store/reducers";
 import axios from "axios";
 import { useSelector } from 'react-redux'
+import FollowersBar from "../FollowersBar/FollowersBar";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -39,7 +40,6 @@ const Profile = ({getUser, userData, deletePost}) => {
     const removeCard = (searchParamsForDatabase) => {
         deletePost(searchParamsForDatabase, user.email);
         const newRenderList = renderedCards && renderedCards.filter((item) => item.postComId !== searchParamsForDatabase);
-        console.log(newRenderList)
         setNumberOfRenderedCards(newRenderList);
     };
 
@@ -55,6 +55,7 @@ const Profile = ({getUser, userData, deletePost}) => {
         />);};
 
     return (
+        <div>
         <Grid container
               direction="row"
               justify="space-evenly"
@@ -62,6 +63,8 @@ const Profile = ({getUser, userData, deletePost}) => {
               className={classes.root}>
             { renderCards() }
         </Grid>
+            <FollowersBar />
+        </div>
     );
 };
 
