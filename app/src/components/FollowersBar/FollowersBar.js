@@ -28,12 +28,14 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(2, 2, 0),
     },
     paper: {
-        position: 'sticky',
-        bottom: '-10px',
-        left: '0',
+        // position: 'fixed',
+        // bottom: '37%',
+        // right: '0',
+        zIndex: '2',
         paddingBottom: 50,
-        marginTop: '20px',
-        width: '300px',
+        marginTop: '10px',
+        width: '350px',
+        height: '450px',
         overflow: 'auto'
     },
     list: {
@@ -50,14 +52,6 @@ const useStyles = makeStyles((theme) => ({
     grow: {
         flexGrow: 1,
     },
-    fabButton: {
-        position: 'absolute',
-        zIndex: 1,
-        top: -30,
-        left: 0,
-        right: 0,
-        margin: '0 auto',
-    },
     dn: {
         display: 'none !important',
     },
@@ -68,6 +62,12 @@ const useStyles = makeStyles((theme) => ({
         position: 'absolute',
         right: '2%',
         top: '10%'
+    },
+    followersMenuButton: {
+        position: 'fixed',
+        right: '2%',
+        top: '12%',
+        zIndex: '3'
     }
 }));
 
@@ -107,7 +107,8 @@ export default function FollowersBar() {
     return (
         <React.Fragment>
             <CssBaseline />
-            <Paper square className={isMenuOpen ? classes.paper : classes.dn}>
+            {/*<Paper square className={isMenuOpen ? classes.paper : classes.dn}>*/}
+            <Paper square className={classes.paper }>
                 <Typography className={classes.text} variant="h5" gutterBottom>
                     Followers
                 </Typography>
@@ -125,14 +126,9 @@ export default function FollowersBar() {
                         </React.Fragment>
                 </List>
             </Paper>
-            <AppBar position="fixed" color="primary" className={classes.appBar}>
-                <Toolbar>
-                    <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={toggleMenu}>
-                        <MenuIcon />
-                    </IconButton>
-                    <div className={classes.grow} />
-                </Toolbar>
-            </AppBar>
+            {/*<IconButton className={classes.followersMenuButton} edge="start" color="inherit" aria-label="open drawer" onClick={toggleMenu}>*/}
+            {/*    <MenuIcon />*/}
+            {/*</IconButton>*/}
         </React.Fragment>
     );
 }
@@ -146,7 +142,7 @@ const FollowersBarUser = ({ avatar, name, ids, follows }) => {
     const [followColor, setFollowColor] = useState(follows);
 
     const follow = (email, follows) => {
-        if (followColor ) {
+        if ( followColor ) {
             setFollowColor(false);
             axios.put('http://localhost:4000/api/followers', {params: { mail: user.email, userName: email  } });
         } else {
@@ -156,18 +152,20 @@ const FollowersBarUser = ({ avatar, name, ids, follows }) => {
     };
 
     return (
-        <NavLink to = {`/guests/${name}`}>
+
         <div key={ids} className={classes.menuItem}>
-            <ListItem button >
-                <ListItemAvatar>
-                    <Avatar alt="Profile Picture" src={avatar}/>
-                </ListItemAvatar>
-                <ListItemText primary={name}/>
-            </ListItem>
+            <NavLink to={`/guests/${name}`}>
+                <ListItem button>
+                    <ListItemAvatar>
+                        <Avatar alt="Profile Picture" src={avatar}/>
+                    </ListItemAvatar>
+                    <ListItemText primary={name}/>
+                </ListItem>
+            </NavLink>
             <IconButton edge="start" color="inherit" aria-label="add-favs" className={classes.menuButton} onClick={follow.bind(this, name, follows)}>
                 <StarRounded  color={ followColor ? "primary" : "disabled"} />
             </IconButton>
         </div>
-        </NavLink>
+
     );
 };

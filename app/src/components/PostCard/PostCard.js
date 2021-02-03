@@ -29,7 +29,8 @@ import axios from "axios";
 const useStyles = makeStyles((theme) => ({
     root: {
         marginTop: '10px',
-        maxWidth: 345,
+        width: '350px',
+
     },
     media: {
         height: 0,
@@ -85,7 +86,6 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
     const renderComment = (author, text, i) => {
         return (
             <div key={i}>
-                <hr/>
                 <Typography variant="h6">{author}</Typography>
                 <Typography paragraph>{text}</Typography>
             </div>
@@ -131,9 +131,7 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
                     <IconButton aria-label="delete" onClick={removeCard.bind(this, postComId)} >
                         <CancelRoundedIcon fontSize="large"   />
                     </IconButton>
-                }
-
-            />
+                }/>
             <CardMedia
                 className={classes.media}
                 image={photo || 'img'}
@@ -159,14 +157,13 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
                     })}
                     onClick={handleExpandClick}
                     aria-expanded={expanded}
-                    aria-label="show more"
-                >
+                    aria-label="show more">
                     <ExpandMoreIcon />
                 </IconButton>
             </CardActions>
             <Collapse in={expanded} timeout="auto" unmountOnExit >
                 <CardContent className={classes.commentsBlock} >
-                    {/*{console.log(commentsList)}*/}
+
                     {commentsList && commentsList.map( ( item, i ) => renderComment(item.author, item.text, i) )}
 
                 </CardContent>

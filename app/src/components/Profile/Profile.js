@@ -10,6 +10,7 @@ import { getUser, deletePost } from "../../store/reducers";
 import axios from "axios";
 import { useSelector } from 'react-redux'
 import FollowersBar from "../FollowersBar/FollowersBar";
+import Typography from '@material-ui/core/Typography';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -44,6 +45,8 @@ const Profile = ({getUser, userData, deletePost}) => {
     };
 
     const renderCards = () => {
+        if (renderedCards.length === 0) return <Typography variant="h3" className={classes.root} color="error">No items.</Typography>;
+
         return renderedCards && renderedCards.map( ( item, i ) => <PostCard key={i}
                                                                               comments={item.comments}
                                                                               photo={item.img}
@@ -56,14 +59,16 @@ const Profile = ({getUser, userData, deletePost}) => {
 
     return (
         <div>
+
         <Grid container
               direction="row"
               justify="space-evenly"
               alignItems="flex-start"
               className={classes.root}>
+            <FollowersBar />
             { renderCards() }
         </Grid>
-            <FollowersBar />
+
         </div>
     );
 };
