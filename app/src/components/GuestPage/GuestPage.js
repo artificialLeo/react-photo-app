@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import Album from "../Album/Album";
 import axios from "axios";
 
 const GuestPage = ({history}) => {
@@ -17,7 +18,7 @@ const GuestPage = ({history}) => {
 
     return (
         <div>
-
+            <Album data={currentUserData} />
         </div>
     );
 };

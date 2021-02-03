@@ -85,6 +85,7 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
     const renderComment = (author, text, i) => {
         return (
             <div key={i}>
+                <hr/>
                 <Typography variant="h6">{author}</Typography>
                 <Typography paragraph>{text}</Typography>
             </div>

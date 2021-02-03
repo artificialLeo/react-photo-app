@@ -156,7 +156,7 @@ const FollowersBarUser = ({ avatar, name, ids, follows }) => {
     };
 
     return (
-        <NavLink to = {`/user/${name}`}>
+        <NavLink to = {`/guests/${name}`}>
         <div key={ids} className={classes.menuItem}>
             <ListItem button >
                 <ListItemAvatar>
