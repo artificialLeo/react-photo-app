@@ -132,3 +132,32 @@ app.put("/api/followers", jsonParser, function(req, res){
         res.send(user);
     });
 });
+
+app.put("/api/page", jsonParser, function(req, res){
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const page = req.body.params.page;
+
+    User.findOne({mail: mail}, {posts: {$slice: [(page - 1) * 6, 6]}},function(err, user){
+
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
+
+app.put("/api/newcomment", jsonParser, function(req, res){
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const id = req.body.params.id;
+
+    User.findOne({mail: mail},{"posts" : 1}, function(err, user){
+
+        if(err) return console.log(err);
+        res.send(user);
+    });
+});
+

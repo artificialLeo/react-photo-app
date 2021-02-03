@@ -12,8 +12,7 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
     },
     paper: {
-        width: '50%',
-        height: '50%',
+        margin: '20px 20px',
         objectFit: 'fill'
     },
 }));
@@ -48,7 +47,7 @@ export default function TransitionsModal( { img } ) {
                 }}
             >
                 <Fade in={open}>
-                    <img src={img} alt="big picture" className={classes.paper} />
+                    <img src={img} alt="big picture" className={classes.paper} onClick={handleClose} />
                 </Fade>
             </Modal>
         </div>

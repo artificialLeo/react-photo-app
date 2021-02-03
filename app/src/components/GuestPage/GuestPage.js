@@ -16,7 +16,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
 import Avatar from "@material-ui/core/Avatar";
-
+import Pagination from "@material-ui/lab/Pagination";
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Modal from "../Modal/Modal";
 
 
@@ -36,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
         paddingBottom: theme.spacing(8),
     },
     card: {
+        minWidth: '220px',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -53,6 +55,10 @@ const useStyles = makeStyles((theme) => ({
     large: {
         width: theme.spacing(7),
         height: theme.spacing(7),
+    },
+    pagination: {
+    position: 'relative',
+    top: '35px',
     }
 }));
 
@@ -63,6 +69,8 @@ const GuestPage = ({history}) => {
 
     const [currentUserData, setCurrentUserData] = useState({});
     const [currentUserPosts, setCurrentUserPosts] = useState([]);
+    const [amountOfPages, setAmountOfPages] = useState(1);
+    const [activePage, setActivePage] = useState(1);
     const [isFollower, setIsFollower] = useState(false);
 
     useEffect(() => {
@@ -72,10 +80,10 @@ const GuestPage = ({history}) => {
         axios.get("http://localhost:4000/api/users/" + currentUserMail, { params: { id: currentUserMail }})
             .then(response => {
                 let guestData = response.data;
-                let guestPots = response.data.posts;
-
+                let pagesInWindow = Math.ceil(response.data.posts.length / 6);
+                console.log(guestData )
+                setAmountOfPages(pagesInWindow);
                 setCurrentUserData(guestData);
-                setCurrentUserPosts(guestPots)
             });
         axios.get("http://localhost:4000/api/users/" + user.email, { params: { id: user.email }})
             .then(response => {
@@ -83,17 +91,32 @@ const GuestPage = ({history}) => {
 
                 setIsFollower(isFollow);
             });
+        axios.put("http://localhost:4000/api/page", { params: { mail: currentUserMail, page: 1 }})
+            .then(response => {
+                let guestPots = response.data.posts;
+
+                setCurrentUserPosts(guestPots)
+            });
     }, [history.location.pathname, user.email]);
 
     const followHandler = () => {
-
         if ( isFollower ) {
             axios.put('http://localhost:4000/api/followers', {params: { mail: user.email, userName: currentUserData.mail  } });
         } else {
             axios.post('http://localhost:4000/api/followers', {params: { mail: user.email, userName: currentUserData.mail  } });
         }
-
         setIsFollower(!isFollower)
+    };
+
+    const paginationHandler = (event, value) => {
+        setActivePage(value);
+
+        axios.put("http://localhost:4000/api/page", { params: { mail: currentUserData.mail, page: value }})
+            .then(response => {
+                let guestPots = response.data.posts;
+
+                setCurrentUserPosts(guestPots)
+            });
     };
 
     return (
@@ -123,8 +146,10 @@ const GuestPage = ({history}) => {
                     </div>
                     <Container className={classes.cardGrid} maxWidth="md">
                         {/* End hero unit */}
-                        <Grid container spacing={4}>
-                            {currentUserPosts.map((card, i) => (
+                        <Grid container spacing={4} justify="center">
+                        <Grid container spacing={4} justify="center">
+                            {!currentUserPosts ? <CircularProgress/> :
+                            currentUserPosts.map((card, i) => (
                                 <Grid item key={i} xs={12} sm={6} md={4}>
                                     <Card className={classes.card}>
                                         <CardMedia
@@ -135,7 +160,7 @@ const GuestPage = ({history}) => {
                                         />
                                         <CardContent className={classes.cardContent}>
                                             <Typography gutterBottom variant="h5" component="h2">
-                                                Description
+                                                 {`Description ${card.postComId}`}
                                             </Typography>
                                             <Typography>
                                                 {card.description}
@@ -147,9 +172,20 @@ const GuestPage = ({history}) => {
                                     </Card>
                                 </Grid>
                             ))}
+
+
                         </Grid>
+                            { amountOfPages > 1 && <Pagination className={classes.pagination}
+                                                               count={amountOfPages && amountOfPages}
+                                                               page={activePage}
+                                                               color="primary"
+                                                               onChange={paginationHandler}
+                            />}
+                        </Grid>
+
                     </Container>
                 </main>
+
 
             </React.Fragment>
 

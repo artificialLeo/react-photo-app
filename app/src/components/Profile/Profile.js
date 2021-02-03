@@ -11,6 +11,7 @@ import axios from "axios";
 import { useSelector } from 'react-redux'
 import FollowersBar from "../FollowersBar/FollowersBar";
 import Typography from '@material-ui/core/Typography';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -25,6 +26,7 @@ const Profile = ({getUser, userData, deletePost}) => {
     const {user} = useAuth0();
 
     let [renderedCards, setNumberOfRenderedCards] = useState([]);
+    let [firstItemsForInfiniteScroll, setFirstItemsForInfiniteScroll] = useState([]);
 
     useEffect(() => {
         // getUser(user.email);

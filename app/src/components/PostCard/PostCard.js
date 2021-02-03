@@ -15,7 +15,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import ShareIcon from '@material-ui/icons/Share';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
+import CloseSharp from '@material-ui/icons/CloseSharp';
 import AddCommentRoundedIcon from '@material-ui/icons/AddCommentRounded';
 import { Input } from '@material-ui/core';
 
@@ -50,12 +50,18 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: red[500],
     },
     inputForComment: {
-        marginTop: '10px'
+        marginTop: '10px',
+        width: '82.5%',
     },
     commentsBlock: {
         display: 'flex',
         flexDirection: 'column-reverse',
         marginBottom: '50px'
+    },
+    addComment: {
+        position: 'relative',
+        top: '8px',
+        left: '15px'
     }
 }));
 
@@ -68,7 +74,8 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
 
     const [like, setLike] = useState(liked);
     const [commentToAdd, setCommentToAdd] = useState('');
-    const [commentsList, setCommentsList] = useState(comments);
+    const [commentsList, setCommentsList] = useState(comments)
+
 
     // useEffect(() => {
     //     console.log(commentsList)
@@ -111,8 +118,12 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
             commentInput.current.value = '';
             setCommentToAdd('');
 
-            // axios.get("http://localhost:4000/api/users/" + user.email, { params: { id: user.email }})
-            //     .then(response => console.log(response.data.posts.find(item => item.postComId)) );
+            axios.put("http://localhost:4000/api/newcomment/", { params: { mail: user.email, id: id }})
+                .then(response => {
+                    let temp = response.data.posts.find(item => item.postComId === id).comments
+
+                    setCommentsList(temp)
+                });
 
 
         }
@@ -129,7 +140,7 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
                 }
                 action={
                     <IconButton aria-label="delete" onClick={removeCard.bind(this, postComId)} >
-                        <CancelRoundedIcon fontSize="large"   />
+                        <CloseSharp color="error"  />
                     </IconButton>
                 }/>
             <CardMedia
@@ -143,14 +154,15 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
                     {description}
                 </Typography>
                 <Input inputRef={commentInput} placeholder="Your Impressions" className={classes.inputForComment} onChange={handleInputChange} />
+                <IconButton aria-label="add-comment" className={classes.addComment}  onClick={addComment.bind(this, postComId)} >
+                    <AddCommentRoundedIcon/>
+                </IconButton>
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="add to favorites" onClick={likePost.bind(this, liked, postComId)}>
                     <FavoriteIcon color={`${like === 'true' ? "error" : "primary" }`} />
                 </IconButton>
-                <IconButton aria-label="add-comment"  onClick={addComment.bind(this, postComId)} >
-                    <AddCommentRoundedIcon/>
-                </IconButton>
+
                 <IconButton
                     className={clsx(classes.expand, {
                         [classes.expandOpen]: expanded,
