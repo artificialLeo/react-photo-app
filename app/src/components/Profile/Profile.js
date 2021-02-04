@@ -56,8 +56,8 @@ const Profile = ({getUser, userData, deletePost}) => {
                                                                               liked={item.liked}
                                                                               postComId={item.postComId}
                                                                               allDataForRemoveHandling={userData.posts}
-                                                                              removeCard={removeCard}
-        />);};
+                                                                              removeCard={removeCard}/>
+                                                                              );};
 
     return (
         <div>

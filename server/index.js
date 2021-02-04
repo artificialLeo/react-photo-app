@@ -9,7 +9,7 @@ const userScheme = new Schema(
     {
         mail: String,
         ava: String,
-        posts: [ { img: String, description: String, liked: String, postComId: String, comments: [ { author: String, text: String } ] } ],
+        posts: [ { img: String, description: String, liked: [String], postComId: String, comments: [ { author: String, text: String } ] } ],
         // guests: [ { name: String, ava: String, follow: String, posts: [ { img: String, comments: [ { author: String, text: String } ] } ] } ]
         followers: [String]
     }, {collection: "usersData"});
@@ -66,16 +66,36 @@ app.put("/api/users/", jsonParser, function(req, res){
     });
 });
 
-app.put("/api/users/:fav", jsonParser, function(req, res){
+app.post("/api/like", jsonParser, function(req, res){
 
     if(!req.body) return res.sendStatus(400);
 
     const mail = req.body.params.mail;
     const id = req.body.params.id;
     const liked = req.body.params.liked;
+    const user = req.body.params.user;
 
-    User.updateOne({mail: mail, "posts.postComId": id}, {
-        $set: { "posts.$.liked" : liked }
+        User.updateOne({mail: user, "posts.postComId": id}, {
+            $addToSet: { "posts.$.liked" : mail }
+        }, function (err, user) {
+
+            if (err) return console.log(err);
+            res.send(user);
+        });
+
+});
+
+app.put("/api/removelike", jsonParser, function(req, res){
+
+    if(!req.body) return res.sendStatus(400);
+
+    const mail = req.body.params.mail;
+    const id = req.body.params.id;
+    const liked = req.body.params.liked;
+    const user = req.body.params.user;
+
+    User.updateOne({mail: user, "posts.postComId": id}, {
+    $pull: { "posts.$.liked" : mail }
     },function(err, user){
 
         if(err) return console.log(err);

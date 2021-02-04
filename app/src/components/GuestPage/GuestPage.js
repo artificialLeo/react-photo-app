@@ -19,7 +19,10 @@ import Avatar from "@material-ui/core/Avatar";
 import Pagination from "@material-ui/lab/Pagination";
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Modal from "../Modal/Modal";
-
+import PostCard from "../PostCard/PostCard";
+import {connect} from "react-redux";
+import {deletePost, getUser} from "../../store/reducers";
+import { selectUserData } from "../../store/actions";
 
 const useStyles = makeStyles((theme) => ({
     icon: {
@@ -63,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const GuestPage = ({history}) => {
+const GuestPage = ({getUser, userData, deletePost, history}) => {
     const classes = useStyles();
     const {user} = useAuth0();
 
@@ -81,7 +84,7 @@ const GuestPage = ({history}) => {
             .then(response => {
                 let guestData = response.data;
                 let pagesInWindow = Math.ceil(response.data.posts.length / 6);
-                console.log(guestData )
+
                 setAmountOfPages(pagesInWindow);
                 setCurrentUserData(guestData);
             });
@@ -119,6 +122,12 @@ const GuestPage = ({history}) => {
             });
     };
 
+    const removeCard = (searchParamsForDatabase) => {
+        deletePost(searchParamsForDatabase, user.email);
+        const newRenderList = currentUserPosts && currentUserPosts.filter((item) => item.postComId !== searchParamsForDatabase);
+        setCurrentUserPosts(newRenderList);
+    };
+
     return (
         <div>
 
@@ -144,34 +153,22 @@ const GuestPage = ({history}) => {
                         </Container>
 
                     </div>
-                    <Container className={classes.cardGrid} maxWidth="md">
+                    <Container className={classes.cardGrid} maxWidth="sm">
                         {/* End hero unit */}
                         <Grid container spacing={4} justify="center">
-                        <Grid container spacing={4} justify="center">
+                        <Grid container spacing={4} justify="center" xs={12} sm={6}>
                             {!currentUserPosts ? <CircularProgress/> :
-                            currentUserPosts.map((card, i) => (
-                                <Grid item key={i} xs={12} sm={6} md={4}>
-                                    <Card className={classes.card}>
-                                        <CardMedia
-                                            component="div"
-                                            className={classes.cardMedia}
-                                            image={card.img}
-                                            title="Image title"
-                                        />
-                                        <CardContent className={classes.cardContent}>
-                                            <Typography gutterBottom variant="h5" component="h2">
-                                                 {`Description ${card.postComId}`}
-                                            </Typography>
-                                            <Typography>
-                                                {card.description}
-                                            </Typography>
-                                        </CardContent>
-                                        <CardActions>
-                                            <Modal img={card.img} />
-                                        </CardActions>
-                                    </Card>
-                                </Grid>
-                            ))}
+                            currentUserPosts.map((item, i) =>
+
+                                <PostCard key={i}
+                                comments={item.comments}
+                                photo={item.img}
+                                description={item.description}
+                                liked={item.liked}
+                                postComId={item.postComId}
+                                allDataForRemoveHandling={userData.posts}
+                                removeCard={removeCard}/>
+                            )}
 
 
                         </Grid>
@@ -193,6 +190,9 @@ const GuestPage = ({history}) => {
     );
 };
 
+const mapStateToProps = (state) => ({
+    userData: selectUserData(state)
+});
 
 
-export default GuestPage;
+export default connect(mapStateToProps, {getUser, deletePost})(GuestPage);

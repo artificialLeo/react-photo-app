@@ -28,8 +28,9 @@ import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        marginTop: '10px',
-        width: '350px',
+        margin: '10px',
+        // width: '350px',
+        minWidth: '200px'
 
     },
     media: {
@@ -62,31 +63,102 @@ const useStyles = makeStyles((theme) => ({
         position: 'relative',
         top: '8px',
         left: '15px'
-    }
+    },
+    icon: {
+        marginRight: theme.spacing(2),
+    },
+    heroContent: {
+        backgroundColor: theme.palette.background.paper,
+        padding: theme.spacing(8, 0, 6),
+    },
+    heroButtons: {
+        marginTop: theme.spacing(4),
+    },
+    cardGrid: {
+        paddingTop: theme.spacing(8),
+        paddingBottom: theme.spacing(8),
+    },
+    card: {
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    cardMedia: {
+        paddingTop: '56.25%', // 16:9
+    },
+    cardContent: {
+        flexGrow: 1,
+    },
+    footer: {
+        backgroundColor: theme.palette.background.paper,
+        padding: theme.spacing(6),
+    },
+
 }));
 
 export default function PostCard({deletePost, postData, comments, photo, description, liked, postComId, removeCard}) {
     const classes = useStyles();
-    const [expanded, setExpanded] = React.useState(false);
+    const [expanded, setExpanded] = useState(false);
     const commentInput = useRef(null);
 
     const { user } = useAuth0();
 
-    const [like, setLike] = useState(liked);
+    const [like, setLike] = useState(liked.includes(user.email).toString());
+    let [numberOfLikes, setNumberOfLikes] = useState(liked.length);
     const [commentToAdd, setCommentToAdd] = useState('');
-    const [commentsList, setCommentsList] = useState(comments)
-
+    const [commentsList, setCommentsList] = useState(comments);
 
     // useEffect(() => {
-    //     console.log(commentsList)
-    // }, []);
+    //      let likeFlag = liked[0].length;
+    //
+    //     console.log(liked[0])
+    //     console.log(liked)
+    //     console.log(likeFlag)
+    // }, [liked, user.email]);
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
 
-    const handleInputChange = () => {
-        setCommentToAdd(commentInput.current.value)
+    const handleInputChange = (e) => {
+        setCommentToAdd(e.target.value)
+    };
+
+
+
+    const likePost = (likeValue, id) => {
+        console.log(likeValue)
+
+        if (likeValue === 'false') {
+            setLike('true');
+            setNumberOfLikes(++numberOfLikes);
+            axios.post("http://localhost:4000/api/like", { params: { id: id, mail: user.email, liked: 'false', user: user.email }});
+        } else {
+            setLike('false');
+            setNumberOfLikes(--numberOfLikes);
+            axios.put("http://localhost:4000/api/removelike", { params: { id: id, mail: user.email, liked: 'true', user: user.email }})
+                .then( r => console.log(r) );
+        }
+    };
+
+    const addComment = (id) => {
+
+        if (commentToAdd.length !== 0) {
+            axios.post("http://localhost:4000/api/comments", {
+                params: {id: id, mail: user.email, userName: user.nickname, userText: commentToAdd}
+            }).then( response => {
+                commentInput.current.value = '';
+                setCommentToAdd('');
+
+            axios.put("http://localhost:4000/api/newcomment/", { params: { mail: user.email, id: id }})
+                .then(response => {
+                    let temp = response.data.posts.find(item => item.postComId === id).comments;
+
+                    setCommentsList(temp)
+                });
+            });
+        }
+
     };
 
 
@@ -97,37 +169,6 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
                 <Typography paragraph>{text}</Typography>
             </div>
         );
-    };
-
-    const likePost = (likeValue, id) => {
-        if (like === 'true') {
-            setLike('false');
-            axios.put("http://localhost:4000/api/users/fav"+id, { params: { id: id, mail: user.email, liked: 'false' }});
-        } else {
-            setLike('true');
-            axios.put("http://localhost:4000/api/users/fav"+id, { params: { id: id, mail: user.email, liked: 'true' }});
-        }
-    };
-
-    const addComment = (id) => {
-        if (commentToAdd.length !== 0) {
-            axios.post("http://localhost:4000/api/comments", {
-                params: {id: id, mail: user.email, userName: user.nickname, userText: commentToAdd}
-            });
-
-            commentInput.current.value = '';
-            setCommentToAdd('');
-
-            axios.put("http://localhost:4000/api/newcomment/", { params: { mail: user.email, id: id }})
-                .then(response => {
-                    let temp = response.data.posts.find(item => item.postComId === id).comments
-
-                    setCommentsList(temp)
-                });
-
-
-        }
-
     };
 
     return (
@@ -151,17 +192,21 @@ export default function PostCard({deletePost, postData, comments, photo, descrip
             />
             <CardContent>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    {description}
+                    {`${description + '|' + postComId}`}
                 </Typography>
-                <Input inputRef={commentInput} placeholder="Your Impressions" className={classes.inputForComment} onChange={handleInputChange} />
+                <Input inputRef={commentInput} value={commentToAdd} placeholder="Your Impressions" className={classes.inputForComment} onChange={handleInputChange} />
                 <IconButton aria-label="add-comment" className={classes.addComment}  onClick={addComment.bind(this, postComId)} >
                     <AddCommentRoundedIcon/>
                 </IconButton>
             </CardContent>
             <CardActions disableSpacing>
-                <IconButton aria-label="add to favorites" onClick={likePost.bind(this, liked, postComId)}>
+                <IconButton aria-label="add to favorites" onClick={likePost.bind(this, like, postComId)}>
                     <FavoriteIcon color={`${like === 'true' ? "error" : "primary" }`} />
                 </IconButton>
+
+                <Typography variant="h6" color="initial" component="span">
+                    {numberOfLikes}
+                </Typography>
 
                 <IconButton
                     className={clsx(classes.expand, {

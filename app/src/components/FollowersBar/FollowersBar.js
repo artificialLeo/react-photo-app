@@ -35,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
         paddingBottom: 50,
         marginTop: '10px',
         width: '350px',
+        minWidth: '250px',
         height: '450px',
         overflow: 'auto'
     },
